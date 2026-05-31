@@ -56,7 +56,7 @@ function App() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', marginTop: '30px' }}>
         
         {/* CỘT TRÁI */}
-        <div style={{ flex: '1 1 300px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#000000' }}>
+        <div style={{ flex: '1 1 300px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#f4f6f9' }}>
           <h2> Live Data Pipeline</h2>
           
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -85,7 +85,7 @@ function App() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
                 
                 {/* BIỂU ĐỒ TRÒN - Đã dùng ResponsiveContainer */}
-                <div style={{ width: '100%', maxWidth: '350px', height: '300px' }}>
+                <div style={{ width: '100%', maxWidth: '350px', height: '350px', marginBottom: '40px' }}>
                   <h4 style={{ textAlign: 'center' }}>Percentage</h4>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -102,7 +102,7 @@ function App() {
 
                 {/* BIỂU ĐỒ CỘT - Đã dùng ResponsiveContainer */}
                 <div style={{ width: '100%', maxWidth: '400px', height: '300px' }}>
-                  <h4 style={{ textAlign: 'center' }}>Quantity Distribution</h4>
+                  <h4 style={{ textAlign: 'center', marginTop: '20px' }}>Quantity distribution</h4>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={liveStats.sentiment_distribution} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
