@@ -56,7 +56,7 @@ function App() {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', marginTop: '30px' }}>
         
         {/* CỘT TRÁI */}
-        <div style={{ flex: '1 1 300px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#f4f6f9' }}>
+        <div style={{ flex: '1 1 300px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#000000' }}>
           <h2> Live Data Pipeline</h2>
           
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
