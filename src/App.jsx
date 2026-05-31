@@ -48,16 +48,16 @@ function App() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1400px', margin: '0 auto' }}>
-      <h1 style={{ textAlign: 'center', color: '#171a21', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>
-        🚀 Steam NLP Dashboard
+      <h1 style={{ textAlign: 'center', color: '#ffffff', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>
+         Steam NLP Dashboard
       </h1>
       
       {/* flexWrap: 'wrap' giúp 2 cột tự rớt xuống thành hàng dọc trên Mobile */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', marginTop: '30px' }}>
         
         {/* CỘT TRÁI */}
-        <div style={{ flex: '1 1 300px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px', backgroundColor: '#f4f6f9' }}>
-          <h2>📡 Live Data Pipeline</h2>
+        <div style={{ flex: '1 1 300px', border: '1px solid #000000', padding: '20px', borderRadius: '8px', backgroundColor: '#f4f6f9' }}>
+          <h2> Live Data Pipeline</h2>
           
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
             <input 
