@@ -72,7 +72,7 @@ function App() {
               disabled={loading}
               style={{ padding: '10px 20px', backgroundColor: '#1b2838', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', borderRadius: '4px', flex: '1 1 100px' }}
             >
-              {loading ? 'Waiting...' : 'Fetch Live Stats'}
+              {loading ? 'Waiting...' : 'Search'}
             </button>
           </div>
 
