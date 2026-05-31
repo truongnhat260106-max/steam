@@ -104,7 +104,7 @@ function App() {
                 <div style={{ width: '100%', maxWidth: '400px', height: '300px' }}>
                   <h4 style={{ textAlign: 'center', marginTop: '20px' }}>Quantity distribution</h4>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={liveStats.sentiment_distribution} margin={{ top: 20, right: 30, left: -20, bottom: 40 }}>
+                    <BarChart data={liveStats.sentiment_distribution} margin={{ top: 20, right: 30, left: -20, bottom: 50 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis dataKey="name" tick={{fontSize: 12}} />
                       <YAxis tick={{fontSize: 12}} />
