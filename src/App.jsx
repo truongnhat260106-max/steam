@@ -144,7 +144,6 @@ function App() {
           {singlePrediction && (
             <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e1f5fe', borderRadius: '4px', borderLeft: '5px solid #66c0f4' }}>
               <p><strong>Classify:</strong> {singlePrediction.prediction}</p>
-              <p><strong>Confidence:</strong> {singlePrediction.confidence}%</p>
             </div>
           )}
         </div>
