@@ -17,7 +17,7 @@ function App() {
   const [singlePrediction, setSinglePrediction] = useState(null);
 
   // ⚠️ BẠN HÃY DÁN ĐƯỜNG LINK RENDER CỦA BẠN VÀO ĐÂY:
-  const API_URL = "https://steam-nlp-dashboard-1.onrender.com";
+  const API_URL = "https://steam-2h9a.onrender.com/";
 
   const COLORS = ['#00C49F', '#FF6B6B', '#FFBB28'];
 
