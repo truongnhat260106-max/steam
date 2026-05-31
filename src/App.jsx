@@ -29,7 +29,7 @@ function App() {
       const response = await axios.get(`${API_URL}/api/steam-live/${appId}`);
       setLiveStats(response.data);
     } catch (err) {
-      setError("Không thể tải dữ liệu. Hãy kiểm tra lại App ID hoặc chờ Backend khởi động lại.");
+      setError("Unable to load data. Please check your App ID or wait for the backend to restart.");
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ function App() {
               type="text" 
               value={appId} 
               onChange={(e) => setAppId(e.target.value)} 
-              placeholder="Nhập Steam App ID"
+              placeholder="Steam App ID"
               style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc', minWidth: '150px' }}
             />
             <button 
@@ -72,7 +72,7 @@ function App() {
               disabled={loading}
               style={{ padding: '10px 20px', backgroundColor: '#1b2838', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', borderRadius: '4px', flex: '1 1 100px' }}
             >
-              {loading ? 'Đang phân tích...' : 'Cào Dữ liệu'}
+              {loading ? 'Waiting...' : 'Fetch Live Stats'}
             </button>
           </div>
 
@@ -86,7 +86,7 @@ function App() {
                 
                 {/* BIỂU ĐỒ TRÒN - Đã dùng ResponsiveContainer */}
                 <div style={{ width: '100%', maxWidth: '350px', height: '300px' }}>
-                  <h4 style={{ textAlign: 'center' }}>Tỷ lệ Phần trăm</h4>
+                  <h4 style={{ textAlign: 'center' }}>Percentage</h4>
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={liveStats.sentiment_distribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
@@ -102,7 +102,7 @@ function App() {
 
                 {/* BIỂU ĐỒ CỘT - Đã dùng ResponsiveContainer */}
                 <div style={{ width: '100%', maxWidth: '400px', height: '300px' }}>
-                  <h4 style={{ textAlign: 'center' }}>Phân bổ Số lượng</h4>
+                  <h4 style={{ textAlign: 'center' }}>Quantity Distribution</h4>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={liveStats.sentiment_distribution} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -125,8 +125,8 @@ function App() {
 
         {/* CỘT PHẢI */}
         <div style={{ flex: '1 1 300px', border: '1px solid #ccc', padding: '20px', borderRadius: '8px' }}>
-          <h2>🧠 Kiểm tra AI (NLP)</h2>
-          <p>Nhập một câu review bất kỳ:</p>
+          <h2>Comment analysis</h2>
+          <p>Enter any review sentence:</p>
           
           <textarea 
             rows="4"
@@ -138,13 +138,13 @@ function App() {
             onClick={handleAnalyzeSingle} 
             style={{ padding: '10px 20px', backgroundColor: '#66c0f4', color: 'black', fontWeight: 'bold', border: 'none', cursor: 'pointer', borderRadius: '4px', width: '100%' }}
           >
-            Test Cảm xúc
+            Test Sentiment 
           </button>
 
           {singlePrediction && (
             <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e1f5fe', borderRadius: '4px', borderLeft: '5px solid #66c0f4' }}>
-              <p><strong>Phân loại:</strong> {singlePrediction.prediction}</p>
-              <p><strong>Độ chắc chắn:</strong> {singlePrediction.confidence}%</p>
+              <p><strong>Classify:</strong> {singlePrediction.prediction}</p>
+              <p><strong>Confidence:</strong> {singlePrediction.confidence}%</p>
             </div>
           )}
         </div>
