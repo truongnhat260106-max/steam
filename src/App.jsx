@@ -55,7 +55,7 @@ function App() {
     <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1400px', margin: '0 auto', backgroundColor: '#1b2838', color: '#c7d5e0', minHeight: '100vh' }}>
       
       <h1 style={{ textAlign: 'center', color: '#ffffff', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', marginBottom: '30px' }}>
-        🚀 Steam NLP Sentiment Dashboard
+         Steam Review
       </h1>
       
       <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -71,7 +71,7 @@ function App() {
           disabled={loading}
           style={{ padding: '15px 30px', backgroundColor: '#66c0f4', color: '#171a21', fontWeight: 'bold', border: 'none', cursor: 'pointer', borderRadius: '8px', fontSize: '16px' }}
         >
-          {loading ? 'Analyzing Data...' : 'Fetch Live Data'}
+          {loading ? 'Please wait...' : 'Search'}
         </button>
       </div>
 
@@ -139,8 +139,8 @@ function App() {
             
             {/* Input Review Box */}
             <div style={{ backgroundColor: '#171a21', padding: '20px', borderRadius: '12px', borderTop: '4px solid #66c0f4', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-              <h3 style={{ color: 'white', marginTop: 0 }}>🧠 Contribute Your Review</h3>
-              <p style={{ fontSize: '14px', color: '#8f98a0' }}>AI will analyze your sentiment before you post it to Steam.</p>
+              <h3 style={{ color: 'white', marginTop: 0 }}> Your Review Here</h3>
+            
               
               <textarea 
                 rows="4"
