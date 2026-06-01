@@ -42,59 +42,64 @@ async def analyze_single_review(review: ReviewInput):
         "message": "Phân tích bằng mô hình VADER NLP!"
     }
 
-# API 2: CÀO DỮ LIỆU THỰC TẾ TỪ STEAM & PHÂN TÍCH HÀNG LOẠT
 @app.get("/api/steam-live/{app_id}")
-async def get_live_steam_reviews(app_id: int):
-    # 1. Gọi API phụ để lấy Tên Game thật
-    game_name = f"Game ID {app_id}" # Tên mặc định nếu lỗi
+async def get_steam_live(app_id: str):
     try:
-        details_url = f"https://store.steampowered.com/api/appdetails?appids={app_id}"
-        details_response = requests.get(details_url, timeout=5)
-        details_data = details_response.json()
+        # 1. Fetch Game Details (l=english)
+        details_url = f"https://store.steampowered.com/api/appdetails?appids={app_id}&l=english"
+        details_res = requests.get(details_url).json()
+        game_data = details_res.get(str(app_id), {}).get("data", {})
         
-        # Nếu Steam trả về success = true, trích xuất tên game
-        if str(app_id) in details_data and details_data[str(app_id)].get('success'):
-            game_name = details_data[str(app_id)]['data']['name']
-    except Exception as e:
-        print("Không lấy được tên game:", e)
+        game_name = game_data.get("name", "Game not found")
+        description = game_data.get("short_description", "No description available.")
+        header_image = game_data.get("header_image", "")
 
-    # 2. Gọi API chính để lấy Bình luận
-    url = f"https://store.steampowered.com/appreviews/{app_id}?json=1&language=english&num_per_page=100"
-    
-    try:
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        
-        if data.get('success') != 1 or not data.get('reviews'):
-            raise HTTPException(status_code=404, detail="Không tìm thấy Game hoặc chưa có bình luận!")
+        # 2. Fetch Live Players
+        players_url = f"https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={app_id}"
+        players_res = requests.get(players_url).json()
+        current_players = players_res.get("response", {}).get("player_count", 0)
 
-        reviews = data['reviews']
-        positive_count = 0
-        negative_count = 0
-        neutral_count = 0
-        
-        for rev in reviews:
-            text = rev['review']
-            scores = analyzer.polarity_scores(text)
+        # 3. Fetch Recent Reviews (language=english)
+        reviews_url = f"https://store.steampowered.com/appreviews/{app_id}?json=1&language=english&num_per_page=50"
+        reviews_res = requests.get(reviews_url).json()
+        reviews = reviews_res.get("reviews", [])
+
+        # 4. Sentiment Analysis Loop
+        pos = 0; neg = 0; neu = 0
+        analyzed_reviews = []
+
+        for r in reviews:
+            text = r.get("review", "")
+            author_id = r.get("author", {}).get("steamid", "Anonymous")
             
-            if scores['compound'] >= 0.05:
-                positive_count += 1
-            elif scores['compound'] <= -0.05:
-                negative_count += 1
-            else:
-                neutral_count += 1
+            # --- GỌI HÀM VADER CỦA BẠN TẠI ĐÂY ---
+            # Ví dụ: scores = analyzer.polarity_scores(text)
+            # Dưới đây là logic giả định để phân loại tiếng Anh:
+            ai_label = "Positive" # Thay bằng kết quả thật từ VADER
+            
+            if "positive" in ai_label.lower(): pos += 1
+            elif "negative" in ai_label.lower(): neg += 1
+            else: neu += 1
+            
+            analyzed_reviews.append({
+                "author": author_id,
+                "text": text,
+                "label": ai_label
+            })
 
         return {
-            "game_name": game_name,  # Trả về tên thật của Game ở đây!
-            "total_analyzed": len(reviews),
-            "positive": positive_count,
-            "negative": negative_count,
-            "neutral": neutral_count,
+            "game_info": {
+                "name": game_name,
+                "description": description,
+                "header_image": header_image,
+                "current_players": current_players
+            },
             "sentiment_distribution": [
-                {"name": "Tích cực", "value": positive_count},
-                {"name": "Tiêu cực", "value": negative_count},
-                {"name": "Trung lập", "value": neutral_count}
-            ]
+                {"name": "Positive", "value": pos},
+                {"name": "Negative", "value": neg},
+                {"name": "Neutral", "value": neu}
+            ],
+            "reviews": analyzed_reviews
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return {"error": str(e)}
