@@ -76,6 +76,40 @@ def get_app_id_from_name(game_name: str):
             
     return None
 
+import urllib.parse
+# Các thư viện khác giữ nguyên...
+
+# --- THÊM PHẦN TÌM KIẾM TÊN GAME ---
+# Biến toàn cục lưu danh sách game vào RAM để server không phải tải lại nhiều lần
+steam_app_cache = {}
+
+def get_app_id_from_name(game_name: str):
+    global steam_app_cache
+    # Nếu RAM chưa có dữ liệu, tải danh sách 100,000+ game từ Steam (Chỉ tốn 1-2s cho lần tra cứu ĐẦU TIÊN)
+    if not steam_app_cache:
+        try:
+            res = requests.get("https://api.steampowered.com/ISteamApps/GetAppList/v2/", timeout=10)
+            apps = res.json().get("applist", {}).get("apps", [])
+            for app in apps:
+                # Lưu tên dạng chữ thường để dễ tìm
+                steam_app_cache[app["name"].lower()] = str(app["appid"])
+        except Exception as e:
+            print("Lỗi tải danh sách game:", e)
+            return None
+
+    search_term = game_name.lower().strip()
+    
+    # Ưu tiên 1: Khớp chính xác 100% (VD: gõ "dota 2" ra đúng ID của dota 2)
+    if search_term in steam_app_cache:
+        return steam_app_cache[search_term]
+        
+    # Ưu tiên 2: Khớp một phần (VD: gõ "cyberpunk" sẽ ra "cyberpunk 2077")
+    for name, app_id in steam_app_cache.items():
+        if search_term in name:
+            return app_id
+            
+    return None
+
 # Đổi {app_id} thành {query} để nhận cả chữ lẫn số
 @app.get("/api/steam-live/{query}")
 async def get_steam_live(query: str):
