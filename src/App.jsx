@@ -152,7 +152,7 @@ function App() {
               
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={handleAnalyzeSingle} style={{ flex: 1, padding: '12px', backgroundColor: '#66c0f4', color: '#171a21', fontWeight: 'bold', border: 'none', cursor: 'pointer', borderRadius: '8px' }}>
-                  AI Check
+                  Check
                 </button>
                 <button onClick={() => window.open(`https://store.steampowered.com/app/${appId}`, "_blank")} style={{ flex: 1, padding: '12px', backgroundColor: '#4c6b22', color: 'white', fontWeight: 'bold', border: 'none', cursor: 'pointer', borderRadius: '8px' }}>
                   Post on Steam
