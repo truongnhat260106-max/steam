@@ -42,10 +42,12 @@ async def analyze_single_review(review: ReviewInput):
         "message": "Phân tích bằng mô hình VADER NLP!"
     }
 
+import urllib.parse # Thêm thư viện này ở đầu file để xử lý lỗi link lật trang
+
 @app.get("/api/steam-live/{app_id}")
 async def get_steam_live(app_id: str):
     try:
-        # 1. Fetch Game Details (l=english)
+        # 1. Lấy thông tin cơ bản của Game
         details_url = f"https://store.steampowered.com/api/appdetails?appids={app_id}&l=english"
         details_res = requests.get(details_url).json()
         game_data = details_res.get(str(app_id), {}).get("data", {})
@@ -54,17 +56,30 @@ async def get_steam_live(app_id: str):
         description = game_data.get("short_description", "No description available.")
         header_image = game_data.get("header_image", "")
 
-        # 2. Fetch Live Players
+        # 2. Lấy lượng người chơi Real-time
         players_url = f"https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={app_id}"
         players_res = requests.get(players_url).json()
         current_players = players_res.get("response", {}).get("player_count", 0)
 
-        # 3. Fetch Recent Reviews (language=english)
-        reviews_url = f"https://store.steampowered.com/appreviews/{app_id}?json=1&language=english&num_per_page=50"
-        reviews_res = requests.get(reviews_url).json()
-        reviews = reviews_res.get("reviews", [])
+        # 3. Lấy 200 bình luận MỚI NHẤT (Dùng vòng lặp lật 2 trang, mỗi trang 100)
+        reviews = []
+        cursor = "*" # Dấu * báo cho Steam biết đây là trang đầu tiên
+        
+        for _ in range(2): 
+            encoded_cursor = urllib.parse.quote(cursor) # Mã hóa cursor để không bị lỗi link
+            # filter=recent giúp lấy bình luận mới nhất thay vì bình luận hữu ích nhất
+            reviews_url = f"https://store.steampowered.com/appreviews/{app_id}?json=1&language=english&filter=recent&num_per_page=100&cursor={encoded_cursor}"
+            reviews_res = requests.get(reviews_url).json()
+            
+            if "reviews" in reviews_res:
+                reviews.extend(reviews_res["reviews"])
+            
+            # Lấy chìa khóa (cursor) để mở trang tiếp theo
+            cursor = reviews_res.get("cursor")
+            if not cursor:
+                break # Nếu game ít review, hết rồi thì dừng lặp
 
-        # 4. Sentiment Analysis Loop
+        # 4. Cho AI VADER thật sự đọc và chấm điểm
         pos = 0; neg = 0; neu = 0
         analyzed_reviews = []
 
@@ -72,14 +87,20 @@ async def get_steam_live(app_id: str):
             text = r.get("review", "")
             author_id = r.get("author", {}).get("steamid", "Anonymous")
             
-            # --- GỌI HÀM VADER CỦA BẠN TẠI ĐÂY ---
-            # Ví dụ: scores = analyzer.polarity_scores(text)
-            # Dưới đây là logic giả định để phân loại tiếng Anh:
-            ai_label = "Positive" # Thay bằng kết quả thật từ VADER
+            # ĐÃ BỎ CODE GIẢ ĐỊNH. GỌI VADER NLP THẬT TẠI ĐÂY:
+            scores = analyzer.polarity_scores(text)
+            compound = scores['compound']
             
-            if "positive" in ai_label.lower(): pos += 1
-            elif "negative" in ai_label.lower(): neg += 1
-            else: neu += 1
+            # Phân loại dựa trên điểm số compound của VADER
+            if compound >= 0.05:
+                ai_label = "Positive"
+                pos += 1
+            elif compound <= -0.05:
+                ai_label = "Negative"
+                neg += 1
+            else:
+                ai_label = "Neutral"
+                neu += 1
             
             analyzed_reviews.append({
                 "author": author_id,
