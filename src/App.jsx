@@ -8,7 +8,7 @@ import {
 import './App.css';
 
 function App() {
-  const [appId, setAppId] = useState('730');
+  const [searchQuery, setSearchQuery] = useState('Dota 2');
   const [liveStats, setLiveStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,7 +25,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_URL}/api/steam-live/${appId}`);
+      const response = await axios.get(`${API_URL}/api/steam-live/${searchQuery}`);
       if(response.data.error) throw new Error(response.data.error);
       setLiveStats(response.data);
     } catch (err) {
@@ -61,10 +61,10 @@ function App() {
       <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', justifyContent: 'center', flexWrap: 'wrap' }}>
         <input 
           type="text" 
-          value={appId} 
-          onChange={(e) => setAppId(e.target.value)} 
-          placeholder="Enter Steam App ID (e.g., 730)"
-          style={{ padding: '15px', borderRadius: '8px', border: 'none', minWidth: '250px', fontSize: '16px', backgroundColor: '#2a475e', color: 'white' }}
+          value={searchQuery} 
+          onChange={(e) => setSearchQuery(e.target.value)} 
+          placeholder="Enter Game Name or ID (e.g., Dota 2, PUBG, 730)"
+          style={{ padding: '15px', borderRadius: '8px', border: 'none', minWidth: '350px', fontSize: '16px', backgroundColor: '#2a475e', color: 'white' }}
         />
         <button 
           onClick={handleFetchLive} 
