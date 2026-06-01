@@ -42,88 +42,12 @@ async def analyze_single_review(review: ReviewInput):
         "message": "Phân tích bằng mô hình VADER NLP!"
     }
 
-import urllib.parse
-# Các thư viện khác giữ nguyên...
+import urllib.parse # Thêm thư viện này ở đầu file để xử lý lỗi link lật trang
 
-# --- THÊM PHẦN TÌM KIẾM TÊN GAME ---
-# Biến toàn cục lưu danh sách game vào RAM để server không phải tải lại nhiều lần
-steam_app_cache = {}
-
-def get_app_id_from_name(game_name: str):
-    global steam_app_cache
-    # Nếu RAM chưa có dữ liệu, tải danh sách 100,000+ game từ Steam (Chỉ tốn 1-2s cho lần tra cứu ĐẦU TIÊN)
-    if not steam_app_cache:
-        try:
-            res = requests.get("https://api.steampowered.com/ISteamApps/GetAppList/v2/", timeout=10)
-            apps = res.json().get("applist", {}).get("apps", [])
-            for app in apps:
-                # Lưu tên dạng chữ thường để dễ tìm
-                steam_app_cache[app["name"].lower()] = str(app["appid"])
-        except Exception as e:
-            print("Lỗi tải danh sách game:", e)
-            return None
-
-    search_term = game_name.lower().strip()
-    
-    # Ưu tiên 1: Khớp chính xác 100% (VD: gõ "dota 2" ra đúng ID của dota 2)
-    if search_term in steam_app_cache:
-        return steam_app_cache[search_term]
-        
-    # Ưu tiên 2: Khớp một phần (VD: gõ "cyberpunk" sẽ ra "cyberpunk 2077")
-    for name, app_id in steam_app_cache.items():
-        if search_term in name:
-            return app_id
-            
-    return None
-
-import urllib.parse
-# Các thư viện khác giữ nguyên...
-
-# --- THÊM PHẦN TÌM KIẾM TÊN GAME ---
-# Biến toàn cục lưu danh sách game vào RAM để server không phải tải lại nhiều lần
-steam_app_cache = {}
-
-def get_app_id_from_name(game_name: str):
-    global steam_app_cache
-    # Nếu RAM chưa có dữ liệu, tải danh sách 100,000+ game từ Steam (Chỉ tốn 1-2s cho lần tra cứu ĐẦU TIÊN)
-    if not steam_app_cache:
-        try:
-            res = requests.get("https://api.steampowered.com/ISteamApps/GetAppList/v2/", timeout=10)
-            apps = res.json().get("applist", {}).get("apps", [])
-            for app in apps:
-                # Lưu tên dạng chữ thường để dễ tìm
-                steam_app_cache[app["name"].lower()] = str(app["appid"])
-        except Exception as e:
-            print("Lỗi tải danh sách game:", e)
-            return None
-
-    search_term = game_name.lower().strip()
-    
-    # Ưu tiên 1: Khớp chính xác 100% (VD: gõ "dota 2" ra đúng ID của dota 2)
-    if search_term in steam_app_cache:
-        return steam_app_cache[search_term]
-        
-    # Ưu tiên 2: Khớp một phần (VD: gõ "cyberpunk" sẽ ra "cyberpunk 2077")
-    for name, app_id in steam_app_cache.items():
-        if search_term in name:
-            return app_id
-            
-    return None
-
-# Đổi {app_id} thành {query} để nhận cả chữ lẫn số
-@app.get("/api/steam-live/{query}")
-async def get_steam_live(query: str):
+@app.get("/api/steam-live/{app_id}")
+async def get_steam_live(app_id: str):
     try:
-        # BỘ LỌC THÔNG MINH: Kiểm tra người dùng nhập Số (ID) hay Chữ (Tên Game)
-        if query.isdigit():
-            app_id = query
-        else:
-            app_id = get_app_id_from_name(query)
-            if not app_id:
-                return {"error": f"Game not found with name: '{query}'. Please try the exact name."}
-
-        # --- TỪ ĐÂY TRỞ XUỐNG LÀ LUỒNG CÀO DỮ LIỆU NHƯ CŨ (Dùng app_id đã tìm được) ---
-        # 1. Lấy thông tin cơ bản
+        # 1. Lấy thông tin cơ bản của Game
         details_url = f"https://store.steampowered.com/api/appdetails?appids={app_id}&l=english"
         details_res = requests.get(details_url).json()
         game_data = details_res.get(str(app_id), {}).get("data", {})
@@ -132,28 +56,30 @@ async def get_steam_live(query: str):
         description = game_data.get("short_description", "No description available.")
         header_image = game_data.get("header_image", "")
 
-        # 2. Lấy lượng người chơi online
+        # 2. Lấy lượng người chơi Real-time
         players_url = f"https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={app_id}"
         players_res = requests.get(players_url).json()
         current_players = players_res.get("response", {}).get("player_count", 0)
 
-        # 3. Lấy 200 bình luận mới nhất
+        # 3. Lấy 200 bình luận MỚI NHẤT (Dùng vòng lặp lật 2 trang, mỗi trang 100)
         reviews = []
-        cursor = "*" 
+        cursor = "*" # Dấu * báo cho Steam biết đây là trang đầu tiên
         
         for _ in range(2): 
-            encoded_cursor = urllib.parse.quote(cursor)
+            encoded_cursor = urllib.parse.quote(cursor) # Mã hóa cursor để không bị lỗi link
+            # filter=recent giúp lấy bình luận mới nhất thay vì bình luận hữu ích nhất
             reviews_url = f"https://store.steampowered.com/appreviews/{app_id}?json=1&language=english&filter=recent&num_per_page=100&cursor={encoded_cursor}"
             reviews_res = requests.get(reviews_url).json()
             
             if "reviews" in reviews_res:
                 reviews.extend(reviews_res["reviews"])
             
+            # Lấy chìa khóa (cursor) để mở trang tiếp theo
             cursor = reviews_res.get("cursor")
             if not cursor:
-                break 
+                break # Nếu game ít review, hết rồi thì dừng lặp
 
-        # 4. Phân tích bằng VADER
+        # 4. Cho AI VADER thật sự đọc và chấm điểm
         pos = 0; neg = 0; neu = 0
         analyzed_reviews = []
 
@@ -161,9 +87,11 @@ async def get_steam_live(query: str):
             text = r.get("review", "")
             author_id = r.get("author", {}).get("steamid", "Anonymous")
             
+            # ĐÃ BỎ CODE GIẢ ĐỊNH. GỌI VADER NLP THẬT TẠI ĐÂY:
             scores = analyzer.polarity_scores(text)
             compound = scores['compound']
             
+            # Phân loại dựa trên điểm số compound của VADER
             if compound >= 0.05:
                 ai_label = "Positive"
                 pos += 1
