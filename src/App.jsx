@@ -45,7 +45,7 @@ function App() {
       // Dọn dẹp bộ đếm khi người dùng chuyển game hoặc tắt web
       return () => clearInterval(timer);
     }
-  }, [liveStats, searchQuery]);
+  }, [liveStats, appId]);
 
   const handleAnalyzeSingle = async () => {
     if (!reviewText.trim()) return;
