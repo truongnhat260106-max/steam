@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   PieChart, Pie, Cell, Tooltip as PieTooltip, Legend, 
@@ -34,6 +34,18 @@ function App() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    // Chỉ bắt đầu đếm giờ nếu đã có dữ liệu trên màn hình (người dùng đã bấm tìm kiếm)
+    if (liveStats) {
+      const timer = setInterval(() => {
+        console.log("Đang tự động làm mới dữ liệu...");
+        handleFetchLive(); 
+      }, 60000); // 60000 mili-giây = 60 giây (1 phút)
+
+      // Dọn dẹp bộ đếm khi người dùng chuyển game hoặc tắt web
+      return () => clearInterval(timer);
+    }
+  }, [liveStats, searchQuery]);
 
   const handleAnalyzeSingle = async () => {
     if (!reviewText.trim()) return;
