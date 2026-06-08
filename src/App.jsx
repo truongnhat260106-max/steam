@@ -175,7 +175,7 @@ function App() {
                 {liveStats.reviews.map((rev, idx) => (
                   <div key={idx} style={{ backgroundColor: '#2a475e', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                      <span style={{ fontWeight: 'bold', color: '#66c0f4' }}>User_{rev.author.substring(0,6)}...</span>
+                      <span style={{ fontWeight: 'bold', color: '#66c0f4' }}>User_{rev.author.slice(-6)}...</span>
                       <span style={{ backgroundColor: getBadgeColor(rev.label), color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
                         {rev.label}
                       </span>
